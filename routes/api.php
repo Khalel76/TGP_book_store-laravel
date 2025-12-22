@@ -49,7 +49,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
 
 Route::post('customer/sign-up', [CustomerAuthController::class, 'signup']);
 Route::prefix('customer')->middleware(['auth:sanctum', CustomerMiddleware::class])->group(function () {
-   Route::put('editProfile', [CustomerAuthController::class, 'editProfile']);
+    Route::put('editProfile', [CustomerAuthController::class, 'editProfile']);
     Route::apiResource('book', CustomerBookController::class)->only(['index', 'show']);
     Route::apiResource('order', CustomerOrderController::class)->only('index');
     Route::apiResource('category', CustomerCategoryController::class)->only('index');
@@ -63,11 +63,13 @@ Route::prefix('customer')->middleware(['auth:sanctum', CustomerMiddleware::class
 
 Route::post('author/sign-up', [AuthorAuthController::class, 'signup']);
 Route::prefix('author')->middleware(['auth:sanctum', AuthorMiddleware::class])->group(function () {
-    Route::apiResource('book', BookController::class);
-    Route::patch('book/updateStock/{book_id}', [BookController::class, 'updateStock']);
-    Route::post('book/addRequest', [BookController::class, 'addRequest']);
-    Route::get('book/Request', [BookController::class, 'getRequestes']);
+    Route::patch('books/updateStock/{book_id}', [BookController::class, 'updateStock']);
+    Route::post('books/addRequest', [BookController::class, 'addRequest']);
+    Route::post('books/rejectRequest', [BookController::class, 'rejectRequest']);
+    Route::post('books/acceptRequest', [BookController::class, 'accseptRequestes']);
+    Route::get('books/getRequests', [BookController::class, 'getRequestes']);
     Route::get('showAll', [BookController::class, 'showAll']);
+    Route::apiResource('book', BookController::class);
     Route::apiResource('category', AuthorCategoryController::class)->only('index');
     Route::apiResource('order', OrderController::class)->only('index');
 

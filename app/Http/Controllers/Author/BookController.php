@@ -28,19 +28,119 @@ class BookController extends Controller
     }
 
     public function getRequestes()
-{
-    $user = Auth::user();
+    {
+         // $booksWithRequests = BookRequsestAuthor::where('', $user->id)
+        //     ->whereHas('requestes')
+        //     ->with('requestes.user')
+        //     ->get();
+        $user = Auth::user();
 
-    $booksWithRequests = Book::where('owner_id', $user->id)
-        ->whereHas('requestes')
-        ->with('requestes')   
+        $userBookIds = $user->books()->pluck('id');
+        // foreach($userBookIds as $userBookId)
+        // {
+        //     $booksWithRequests = BookRequsestAuthor::where('book_id', $userBookId);
+        // }
+        $allRequests = BookRequsestAuthor::whereIn('book_id', $userBookIds)
+        ->with('book') 
         ->get();
 
-    return response()->json([
-        'status' => true,
-        'data'   => $booksWithRequests
-    ], 200);
-}
+        return response()->json([
+            'status' => true,
+            'BookRequsestAuthor' => $allRequests
+        ], 200);
+    }
+
+
+    public function addRequest(Request $request)
+    {
+        $user_id = Auth::user()->id;
+
+        $inputs = $request->validate([
+            'book_id' => ['required', 'exists:books,id'],
+        ]);
+
+        $existingRequest = BookRequsestAuthor::where('book_id', $inputs['book_id'])
+            ->where('user_id', $user_id)
+            ->exists();
+
+        if ($existingRequest) {
+            return response()->json([
+                'message' => 'Request already sent',
+            ], 400);
+        }
+
+        $book = Book::find($inputs['book_id']);
+        if ($book->user()->where('users.id', $user_id)->exists()) {
+            return response()->json([
+                'message' => 'You are already an author of this book',
+            ], 400);
+        }
+
+        $inputs['user_id'] = $user_id;
+        $bookRequsestAuthor = BookRequsestAuthor::create($inputs);
+        return response()->json([
+            'message' => 'the request added',
+            'BookRequsestAuthor' => $bookRequsestAuthor
+        ], 201);
+    }
+
+    public function accseptRequestes(Request $request)
+    {
+        $inputs = $request->validate([
+            'book_id' => ['required', 'exists:books,id'],
+            'user_id' => ['required', 'exists:users,id']
+        ]);
+
+        $user = Auth::user();
+        $book = Book::findOrFail($inputs['book_id']);
+
+        if ($user->id != $book->owner_id) {
+            return response()->json([
+                'message' => 'The book is not yours'
+            ], 403);
+        }
+
+        $partnerUser = User::findOrFail($inputs['user_id']);
+
+        if (!$book->user->contains($partnerUser->id)) {
+            $book->user()->attach($partnerUser->id);
+        }
+
+        BookRequsestAuthor::where('book_id', $book->id)
+            ->where('user_id', $partnerUser->id)
+            ->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Request accepted and user added as partner'
+        ], 200);
+    }
+
+    public function rejectRequest(Request $request)
+    {
+        $inputs = $request->validate([
+            'book_id' => ['required', 'exists:books,id'],
+            'user_id' => ['required', 'exists:users,id']
+        ]);
+
+        $user = Auth::user();
+        $book = Book::findOrFail($inputs['book_id']);
+
+        if ($user->id != $book->owner_id) {
+            return response()->json([
+                'message' => 'The book is not yours'
+            ], 403);
+        }
+
+        BookRequsestAuthor::where('book_id', $book->id)
+            ->where('user_id', $inputs['user_id'])
+            ->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Request rejected'
+        ], 200);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -50,14 +150,14 @@ class BookController extends Controller
         $user = Auth::user();
 
         $inputs = $request->validate([
-        'title' => ['required', 'max:255'],
-        'publish_year' => ['required', 'min:4', 'max:4'],
-        'price' => ['required', 'decimal:1,50'],
-        'isbn' => ['required'],
-        'category_id' => ['required', 'exists:categories,id'],
-        'owner_id' => ['nullable'],
-        'qty' => ['nullable'],
-         ]);
+            'title' => ['required', 'max:255'],
+            'publish_year' => ['required', 'min:4', 'max:4'],
+            'price' => ['required', 'decimal:1,50'],
+            'isbn' => ['required'],
+            'category_id' => ['required', 'exists:categories,id'],
+            'owner_id' => ['nullable'],
+            'qty' => ['nullable'],
+        ]);
 
         $inputs['owner_id'] = $user->id;
 
@@ -68,22 +168,7 @@ class BookController extends Controller
         return response()->json($book);
     }
 
-    public function addRequest(Request $request)
-    {
-        $user_id = Auth::user()->id;
 
-        $inputs = $request->validate([
-        'book_id' => ['required', 'exists:books,id'],
-        'id' => ['required']
-         ]);
-
-        $inputs['user_id'] = $user_id;
-        $bookRequsestAuthor = BookRequsestAuthor::create($inputs);
-        return response()->json([
-            'message' => 'the request added',
-            'BookRequsestAuthor' => $bookRequsestAuthor
-        ], 201);
-    }
 
     /**
      * Display the specified resource.
@@ -98,16 +183,13 @@ class BookController extends Controller
         $user = Auth::user();
         $userBookIds = $user->books()->pluck('id');
         $isBookForSingedInAuthor = false;
-        foreach ($userBookIds as $userBookId)
-        {
-            if($book_id == $userBookId)
-            {
+        foreach ($userBookIds as $userBookId) {
+            if ($book_id == $userBookId) {
                 $isBookForSingedInAuthor = true;
                 break;
             }
         }
-        if($isBookForSingedInAuthor)
-        {
+        if ($isBookForSingedInAuthor) {
             $book = Book::findOrFail($book_id);
             $book->qty = $request->qty;
             $book->save();
@@ -115,8 +197,8 @@ class BookController extends Controller
         }
 
         return response()->json([
-                'message' => 'The book are not yours to update qty'
-            ], 401);
+            'message' => 'The book are not yours to update qty'
+        ], 401);
     }
 
     /**
@@ -127,18 +209,16 @@ class BookController extends Controller
         $user = Auth::user();
         $userBookIds = $user->books()->pluck('id');
         $isBookForSingedInAuthor = false;
-        foreach ($userBookIds as $userBookId)
-        {
-            if($id == $userBookId)
-            {
+        foreach ($userBookIds as $userBookId) {
+            if ($id == $userBookId) {
                 $isBookForSingedInAuthor = true;
                 break;
             }
         }
 
-        if(!$isBookForSingedInAuthor){
+        if (!$isBookForSingedInAuthor) {
             return response()->json([
-            'message' => 'The book are not yours to update it'
+                'message' => 'The book are not yours to update it'
             ], 401);
         }
 

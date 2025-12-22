@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            $table->id()->change();
+        Schema::create('book_requsest_authors', function (Blueprint $table) {
+            $table->id();
+            $table->integer('user_id');
+            $table->integer('book_id');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            $table->intege('id')->change();
-        });
+        Schema::dropIfExists('book_requsest_authors');
     }
 };
