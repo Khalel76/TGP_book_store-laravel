@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
+        Schema::create('customer_payments', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->decimal('price',10,3);
-            $table->integer('publish_year');
-            $table->string('isbn')->unique();
-            $table->integer('category_id');
-            $table->timestamps();
-        });
+    $table->date('date');
+    $table->integer('customer_id');
+    $table->integer('treasury_id');
+    $table->decimal('amount', 18, 2);
+    $table->string('notes')->nullable();
+    $table->timestamps();
+});
     }
 
     /**
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('books');
+        Schema::dropIfExists('customer_payments');
     }
 };

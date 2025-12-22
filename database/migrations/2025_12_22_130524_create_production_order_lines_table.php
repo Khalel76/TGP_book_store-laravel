@@ -11,15 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('production_order_lines', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->decimal('total',12,3);
-            $table->integer('payment_method_id');
-            $table->string('address');
-            $table->string('status');
-            $table->timestamps();
-        });
+    $table->integer('production_order_id');
+    $table->integer('product_id'); // المادة المسحوبة من المخزن
+    $table->double('quantity_used');
+    $table->timestamps();
+});
     }
 
     /**
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('production_order_lines');
     }
 };

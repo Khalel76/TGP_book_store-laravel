@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            $table->integer('qty');
+        Schema::create('bill_of_materials', function (Blueprint $table) {
+           $table->id();
+    $table->string('name'); // اسم القالب (حوض ملكي)
+    $table->integer('product_id')->nullable(); // المنتج الناتج (اختياري)
+    $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('bill_of_materials');
     }
 };

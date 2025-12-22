@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_methods', function (Blueprint $table) {
+        Schema::create('purchase_bills', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->timestamps();
-        });
+    $table->date('date');
+    $table->string('invoice_number')->nullable(); // فاتورة المورد
+    $table->integer('supplier_id');
+    $table->decimal('total_amount', 18, 2)->default(0);
+    $table->timestamps();
+});
     }
 
     /**
@@ -23,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('payment_methods');
+        Schema::dropIfExists('purchase_bills');
     }
 };

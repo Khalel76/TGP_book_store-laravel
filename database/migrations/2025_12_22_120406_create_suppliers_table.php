@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            $table->integer('owner_id');
-        });
+        Schema::create('suppliers', function (Blueprint $table) {
+             $table->id();
+    $table->string('name');
+    $table->string('company_name')->nullable();
+    $table->string('phone')->nullable();
+    $table->decimal('balance', 18, 2)->default(0);
+    $table->timestamps();
+});
     }
 
     /**
@@ -21,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('books', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('suppliers');
     }
 };

@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('carts', function (Blueprint $table) {
+        Schema::create('production_orders', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('payment_method_id');
-            $table->string('address');
-            $table->timestamps();
-        });
+    $table->date('date');
+    $table->boolean('is_completed')->default(false);
+    $table->integer('product_id'); // المنتج المراد تصنيعه
+    $table->double('quantity_to_produce');
+    $table->timestamps();
+});
     }
 
     /**
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('carts');
+        Schema::dropIfExists('production_orders');
     }
 };

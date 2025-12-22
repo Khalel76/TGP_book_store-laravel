@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('authors', function (Blueprint $table) {
+        Schema::create('supplier_payments', function (Blueprint $table) {
             $table->id();
-            $table->text('bio');
-            $table->string('country');
-            $table->integer('user_id');
-            $table->timestamps();
-        });
+    $table->date('date');
+    $table->integer('supplier_id');
+    $table->integer('treasury_id');
+    $table->decimal('amount', 18, 2);
+    $table->string('notes')->nullable();
+    $table->timestamps();
+});
     }
 
     /**
@@ -25,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('authors');
+        Schema::dropIfExists('supplier_payments');
     }
 };

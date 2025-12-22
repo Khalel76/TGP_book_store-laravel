@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('book_requsest_authors', function (Blueprint $table) {
+        Schema::create('treasuries', function (Blueprint $table) {
             $table->id();
-            $table->integer('user_id');
-            $table->integer('book_id');
-            $table->timestamps();
-        });
+    $table->string('name');
+    $table->decimal('current_balance', 18, 2)->default(0);
+    $table->timestamps();
+});
     }
 
     /**
@@ -24,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('book_requsest_authors');
+        Schema::dropIfExists('treasuries');
     }
 };

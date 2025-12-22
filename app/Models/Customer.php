@@ -7,8 +7,16 @@ use Illuminate\Database\Eloquent\Model;
 class Customer extends Model
 {
     protected $fillable = [
-        'phone_number',
-        'address',
-        'email',
+        'name', 'phone', 'address', 'balance'
     ];
+
+    public function invoices()
+    {
+        return $this->hasMany(SalesInvoice::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(CustomerPayment::class);
+    }
 }
