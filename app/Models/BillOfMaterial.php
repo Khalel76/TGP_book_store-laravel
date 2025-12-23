@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class BillOfMaterial extends Model
 {
     protected $fillable = [
-        'name', 'product_id'
+        'name',
+        'product_id'
     ];
 
     public function product() // المنتج النهائي المتوقع
@@ -17,6 +18,6 @@ class BillOfMaterial extends Model
 
     public function details() // المكونات
     {
-        return $this->hasMany(BillOfMaterialDetail::class);
+        return $this->hasMany(BOMDetail::class);
     }
 }
