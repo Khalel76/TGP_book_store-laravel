@@ -9,6 +9,8 @@ use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\InventoryTransactionController;
+
 use App\Http\Middleware\AdminMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -40,8 +42,7 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
         Route::get('/{id}/stock', [ProductController::class, 'checkStock']);
     });
 
-    // Category Management (Standard CRUD)
-    Route::apiResource('categories', CategoryController::class);
+
 
     // --- 2. Sales & Customers ---
     Route::prefix('sales')->group(function () {
@@ -98,4 +99,6 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
 
     // --- 6. Categories ---
     Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('inventories', InventoryTransactionController::class);
+
 });

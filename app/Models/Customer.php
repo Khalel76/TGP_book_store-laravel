@@ -37,6 +37,6 @@ class Customer extends Model
 
         $totalPayments = $this->payments()->sum('amount');
 
-        return $totalSales - $totalPayments;
+        return $totalPayments - $totalSales ;
     }
 }

@@ -60,17 +60,18 @@ class PurchaseController extends Controller
             foreach ($request->items as $item) {
                 $product = Product::lockForUpdate()->find($item['product_id']);
 
-                $oldQty = $product->quantity_in_stock;
-                $oldCost = $product->cost_price;
+                // $oldQty = $product->quantity_in_stock;
+                // $oldCost = $product->cost_price;
                 $newQty = $item['quantity'];
                 $newCost = $item['cost_price'];
+                $weightedAvgCost = $newCost;
 
                 // A. Calculate Weighted Average Cost
-                if ($oldQty > 0) {
-                    $weightedAvgCost = (($oldQty * $oldCost) + ($newQty * $newCost)) / ($oldQty + $newQty);
-                } else {
-                    $weightedAvgCost = $newCost;
-                }
+                // if ($oldQty > 0) {
+                //     $weightedAvgCost = (($oldQty * $oldCost) + ($newQty * $newCost)) / ($oldQty + $newQty);
+                // } else {
+                //     $weightedAvgCost = $newCost;
+                // }
 
                 // B. Update Stock and Cost
                 $product->increment('quantity_in_stock', $newQty);

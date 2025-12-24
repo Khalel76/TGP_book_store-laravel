@@ -31,10 +31,27 @@ class Supplier extends Model
         // Calculate total purchases
         $totalPurchases = \App\Models\PurchaseItem::whereHas('purchaseBill', function ($q) {
             $q->where('supplier_id', $this->id);
-        })->selectRaw('sum(quantity * unit_price) as total')->value('total') ?? 0;
+        })->selectRaw('sum(quantity * cost_price) as total')->value('total') ?? 0;
 
         $totalPayments = $this->payments()->sum('amount');
 
         return $totalPurchases - $totalPayments;
     }
+
+//         public function getBalanceAttribute()
+// {
+//     // 1. Calculate total purchases (What you owe them)
+//     $totalPurchases = \App\Models\PurchaseItem::whereHas('purchaseBill', function ($q) {
+//         $q->where('supplier_id', $this->id);
+//     })
+//     // FIX: Change 'unit_price' to 'cost_price'
+//     ->selectRaw('sum(quantity * cost_price) as total')
+//     ->value('total') ?? 0;
+
+//     // 2. Calculate total payments (What you paid them)
+//     $totalPayments = $this->payments()->sum('amount');
+
+//     // Supplier balance: Total Bills - Total Paid
+//     return $totalPurchases - $totalPayments;
+// }
 }

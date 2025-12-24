@@ -132,7 +132,7 @@ class SalesController extends Controller
                 // Calculate Total Pieces
                 if (!$product->category || !$product->category->count_in_box) {
                     // Fallback if no category info (though user implied all porcelain has this)
-                    // If it's a simple product without these params, maybe treat input as pieces? 
+                    // If it's a simple product without these params, maybe treat input as pieces?
                     // OR throw error strictly? Given user request "each category had same piece of porsalin", let's be strict or assume 1 if not defined?
                     // Let's throw error to be safe as this logic seems specific to these products.
                     if ($boxes > 0) {
@@ -143,7 +143,7 @@ class SalesController extends Controller
                         // Safest is to error if category data missing for this calculation.
                         // However, to avoid breaking other product sales (non-porcelain?), let's check product type or category fields.
 
-                        // If category has no count_in_box, we fall back to treating input as direct quantity units (pieces/items), 
+                        // If category has no count_in_box, we fall back to treating input as direct quantity units (pieces/items),
                         // but we need to remove our "boxes" assumption if it wasn't 'm'.
                         // Re-evaluating: The requirement is specific to the new columns.
 
@@ -182,9 +182,10 @@ class SalesController extends Controller
                 ]);
 
                 // C. Calculate Line Total
-                // Assuming selling_price is PER PIECE as stock is per piece. 
+                // Assuming selling_price is PER PIECE as stock is per piece.
                 // "count that decreased ... will be ... box multiple count_in_box".
-                $unitPrice = $product->selling_price;
+                // $unitPrice = $product->selling_price;
+                $unitPrice = $item['unit_price'] ;
                 $lineTotal = $unitPrice * $totalPieces;
                 $totalAmount += $lineTotal;
 
@@ -195,7 +196,7 @@ class SalesController extends Controller
                     'quantity' => $totalPieces, // Store pieces count? Or boxes? "count must be 4" (from user ex 10m -> 4).
                     // User said: "when user want to sell product from that category he can write 10m then the count must be 4"
                     // BUT LATER said: "count that decreased from proudact when user selled will be the sum of box multible count_in_box"
-                    // Usually InvoiceItem should reflect what was actually sold/deducted. 
+                    // Usually InvoiceItem should reflect what was actually sold/deducted.
                     // If stock is pieces, InvoiceItem quantity usually matches stock deduction for consistency.
                     // BUT user might want to see "4 boxes" on the invoice?
                     // User's first prompt: "the count must be 4". This likely referred to the UI/Calculation interim step.

@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\InventoryTransaction;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -72,7 +72,7 @@ class ProductController extends Controller
         $product = Product::create($validated);
 
         if ($product->quantity_in_stock > 0) {
-            \App\Models\InventoryTransaction::create([
+            InventoryTransaction::create([
                 'product_id' => $product->id,
                 'transaction_type' => 'initial_stock',
                 'quantity' => $product->quantity_in_stock,

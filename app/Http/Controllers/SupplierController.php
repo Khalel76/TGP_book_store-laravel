@@ -61,7 +61,7 @@ class SupplierController extends Controller
                 'total_bills' => $supplier->purchaseBills()->count(),
                 'total_purchases' => \App\Models\PurchaseItem::whereHas('purchaseBill', function ($q) use ($id) {
                     $q->where('supplier_id', $id);
-                })->selectRaw('sum(quantity * unit_price) as total')->value('total') ?? 0
+                })->selectRaw('sum(quantity * cost_price) as total')->value('total') ?? 0
             ]
         ]);
     }

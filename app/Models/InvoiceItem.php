@@ -8,10 +8,10 @@ class InvoiceItem extends Model
 {
     protected $fillable = [
         'sales_invoice_id', 'product_id',
-        'quantity', 'unit_price', 'line_total'
+        'quantity', 'unit_price'
     ];
 
-    public function invoice()
+    public function salesinvoice()
     {
         return $this->belongsTo(SalesInvoice::class, 'sales_invoice_id');
     }
@@ -20,4 +20,5 @@ class InvoiceItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+    
 }
