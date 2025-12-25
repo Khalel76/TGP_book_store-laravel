@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Treasury;
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -18,11 +20,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::create([
-            'name'=>'admin',
-            'username'=>'admin',
-            'type'=>'admin',
-            'password'=>Hash::make('password')
+        // User::create([
+        //     'name'=>'admin',
+        //     'username'=>'admin',
+        //     'type'=>'admin',
+        //     'password'=>Hash::make('password')
+        // ]);
+        Treasury::create([
+            'name'=>'main',
         ]);
     }
 }

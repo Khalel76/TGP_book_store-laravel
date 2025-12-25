@@ -32,7 +32,7 @@ class ProductController extends Controller
         }
 
         // Pagination
-        return response()->json($query->get());
+        return response()->json($query->paginate(15));
     }
 
     public function store(Request $request)

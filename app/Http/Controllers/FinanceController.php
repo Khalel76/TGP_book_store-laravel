@@ -8,6 +8,7 @@ use App\Models\ExpenseTransaction;
 use App\Models\Customer;
 use App\Models\Supplier;
 use App\Models\Treasury;
+use App\Models\ExpenseCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -110,8 +111,6 @@ class FinanceController extends Controller
             // A. Create Record
             $payment = CustomerPayment::create($request->all() + ['date' => now()]);
 
-            // Note: Balances are calculated dynamically.
-
             return response()->json(['message' => 'Payment received successfully', 'data' => $payment]);
         });
     }
@@ -160,5 +159,36 @@ class FinanceController extends Controller
 
             return response()->json(['message' => 'Expense recorded successfully', 'data' => $expense]);
         });
+    }
+
+    // 4. Create New Treasury
+    public function storeTreasury(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:treasuries,name|max:255',
+        ]);
+
+        $treasury = Treasury::create($request->all());
+
+        return response()->json([
+            'message' => 'Treasury created successfully',
+            'data' => $treasury
+        ], 201);
+    }
+
+    // 5. Create New Expense Category
+    public function storeExpenseCategory(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|unique:expense_categories,name|max:255',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        $category = ExpenseCategory::create($request->all());
+
+        return response()->json([
+            'message' => 'Expense Category created successfully',
+            'data' => $category
+        ], 201);
     }
 }

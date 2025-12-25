@@ -9,10 +9,15 @@ class InventoryTransactionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = \App\Models\InventoryTransaction::with('reference');
 
-        return \App\Models\InventoryTransaction::with('reference')->get();
+        if ($request->has('product_id')) {
+            $query->where('product_id', $request->product_id);
+        }
+
+        return $query->latest()->paginate(15);
     }
 
     /**

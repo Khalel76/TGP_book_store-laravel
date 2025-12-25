@@ -28,7 +28,7 @@ class ManufacturingController extends Controller
             'product_id' => 'required|exists:products,id',
             'details' => 'required|array|min:1',
             'details.*.product_id' => 'required|exists:products,id',
-            'details.*.quantity' => 'required|numeric|min:0.01'
+            'details.*.quantity' => 'required|integer|min:1'
         ]);
 
         try {
@@ -88,7 +88,7 @@ class ManufacturingController extends Controller
     {
         $request->validate([
             'bill_of_material_id' => 'required|exists:bill_of_materials,id',
-            'quantity_to_produce' => 'required|numeric|min:0.01'
+            'quantity_to_produce' => 'required|integer|min:1'
         ]);
 
         try {
@@ -99,7 +99,7 @@ class ManufacturingController extends Controller
             // 1. Create Production Order Header
             $order = ProductionOrder::create([
                 'date' => now(),
-                'is_completed' => true, // Assuming instant completion for simplicity
+                'is_completed' => true,
                 'product_id' => $bom->product_id, // The finished product
                 'quantity_to_produce' => $request->quantity_to_produce
             ]);
@@ -131,22 +131,44 @@ class ManufacturingController extends Controller
                     'product_id' => $rawMaterial->id,
                     'quantity_used' => $neededQty
                 ]);
+
+                \App\Models\InventoryTransaction::create([
+                    'product_id' => $rawMaterial->id,
+                    'transaction_type' => 'Production',
+                    'quantity' => -$neededQty, // Negative for sales
+                    'reference_type' => ProductionOrder::class,
+                    'reference_id' => $order->id,
+                    'notes' => 'Production Material from Order #' . $order->id
+                ]);
             }
 
             // 3. Calculate Cost Per Unit for Finished Product
             $costPerUnit = $totalCost / $request->quantity_to_produce;
 
             // 4. Add Finished Product to Stock with Calculated Cost
-            $finishedProduct = Product::find($bom->product_id);
+            $finishedProduct = Product::lockForUpdate()->find($bom->product_id);
+
+            // Capture old state for WAC calculation
+            $oldQty = $finishedProduct->quantity_in_stock;
+            $oldCost = $finishedProduct->cost_price;
+
+            // Increment Stock
             $finishedProduct->increment('quantity_in_stock', $request->quantity_to_produce);
 
-            // Update cost price with weighted average
-            $oldQty = $finishedProduct->quantity_in_stock - $request->quantity_to_produce;
-            $oldCost = $finishedProduct->cost_price;
+            \App\Models\InventoryTransaction::create([
+                'product_id' => $bom->product_id,
+                'transaction_type' => 'Production',
+                'quantity' => $request->quantity_to_produce,
+                'reference_type' => ProductionOrder::class,
+                'reference_id' => $order->id,
+                'notes' => 'Finished Product from Order #' . $order->id
+            ]);
+
+            // Calculate Weighted Average Cost
             $newQty = $request->quantity_to_produce;
             $newCost = $costPerUnit;
 
-            if ($oldQty > 0) {
+            if (($oldQty + $newQty) > 0) {
                 $weightedAvgCost = (($oldQty * $oldCost) + ($newQty * $newCost)) / ($oldQty + $newQty);
             } else {
                 $weightedAvgCost = $newCost;

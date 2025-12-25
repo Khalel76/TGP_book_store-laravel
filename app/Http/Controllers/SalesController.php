@@ -186,8 +186,8 @@ class SalesController extends Controller
                 // "count that decreased ... will be ... box multiple count_in_box".
                 // $unitPrice = $product->selling_price;
                 $unitPrice = $item['unit_price'] ;
-                $lineTotal = $unitPrice * $totalPieces;
-                $totalAmount += $lineTotal;
+                // $lineTotal = $unitPrice * $totalPieces;
+                // $totalAmount += $lineTotal;
 
                 // D. Save Item
                 InvoiceItem::create([

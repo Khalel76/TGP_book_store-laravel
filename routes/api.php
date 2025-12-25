@@ -95,6 +95,12 @@ Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->gr
 
         // View Transaction History
         Route::get('/transactions', [FinanceController::class, 'history']);
+
+        // Manage Treasuries
+        Route::post('/treasuries', [FinanceController::class, 'storeTreasury']);
+
+        // Manage Expense Categories
+        Route::post('/expense-categories', [FinanceController::class, 'storeExpenseCategory']);
     });
 
     // --- 6. Categories ---

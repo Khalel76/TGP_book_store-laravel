@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('treasuries', function (Blueprint $table) {
-            $table->id();
-    $table->string('name');
-    $table->decimal('current_balance', 18, 2)->default(0);
-    $table->timestamps();
+        $table->id();
+        $table->string('name');
+        $table->decimal('current_balance', 18, 2)->default(0);
+        $table->timestamps();
 });
     }
 

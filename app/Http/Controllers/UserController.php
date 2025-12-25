@@ -12,9 +12,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::where('type' , '!=' , 'admin')->get();
+        $users = User::where('type' , '!=' , 'admin')->paginate(15);
         return $users;
-
     }
 
     /**
