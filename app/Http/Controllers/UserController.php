@@ -12,16 +12,29 @@ class UserController extends Controller
      */
     public function index()
     {
-        $users = User::where('type' , '!=' , 'admin')->paginate(15);
+        $users = User::where('type', '!=', 'admin')->paginate(15);
         return $users;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username',
+            'password' => 'required|string|min:6',
+            'type' => 'required|in:seller,manufacturer,supervisor',
+        ]);
+
+        $validated['password'] = bcrypt($validated['password']);
+        $validated['status'] = 'approve';
+
+        $user = User::create($validated);
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'data' => $user
+        ], 201);
     }
 
     /**
@@ -42,7 +55,7 @@ class UserController extends Controller
 
     public function block($user_id)
     {
-        $user = User::where('type', '!=' , 'admin')
+        $user = User::where('type', '!=', 'admin')
             ->where('id', $user_id)
             ->firstOrFail();
 
@@ -55,7 +68,7 @@ class UserController extends Controller
 
     public function unblock($user_id)
     {
-        $user = User::where('type', '!=' , 'admin')
+        $user = User::where('type', '!=', 'admin')
             ->where('id', $user_id)
             ->firstOrFail();
 

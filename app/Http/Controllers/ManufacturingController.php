@@ -46,7 +46,7 @@ class ManufacturingController extends Controller
                 'product_id' => $request->product_id
             ]);
 
-            // Create BOM Details (Ingredients/Components)
+            // Create BOM Details
             foreach ($request->details as $detail) {
                 BOMDetail::create([
                     'bill_of_material_id' => $bom->id,
@@ -100,32 +100,27 @@ class ManufacturingController extends Controller
             $order = ProductionOrder::create([
                 'date' => now(),
                 'is_completed' => true,
-                'product_id' => $bom->product_id, // The finished product
+                'product_id' => $bom->product_id,
                 'quantity_to_produce' => $request->quantity_to_produce
             ]);
 
-            $totalCost = 0; // Track total cost for finished product
+            $totalCost = 0;
 
             // 2. Consume Raw Materials
             foreach ($bom->details as $component) {
-                // Calculate total needed (Recipe Qty * Production Qty)
                 $neededQty = $component->quantity * $request->quantity_to_produce;
 
                 $rawMaterial = Product::lockForUpdate()->find($component->product_id);
 
-                // Check Stock
                 if ($rawMaterial->quantity_in_stock < $neededQty) {
                     throw new \Exception("Not enough stock for material: {$rawMaterial->name}. Available: {$rawMaterial->quantity_in_stock}, Needed: {$neededQty}");
                 }
 
-                // Deduct Stock
                 $rawMaterial->decrement('quantity_in_stock', $neededQty);
 
-                // Calculate cost contribution
                 $componentCost = $rawMaterial->cost_price * $neededQty;
                 $totalCost += $componentCost;
 
-                // Record Line
                 ProductionOrderLine::create([
                     'production_order_id' => $order->id,
                     'product_id' => $rawMaterial->id,

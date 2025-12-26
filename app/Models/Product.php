@@ -25,13 +25,11 @@ class Product extends Model
         'unit'
     ];
 
-    // علاقة مع عناصر فاتورة المبيعات
     public function invoiceItems()
     {
         return $this->hasMany(InvoiceItem::class);
     }
 
-    // علاقة مع عناصر فاتورة الشراء
     public function purchaseItems()
     {
         return $this->hasMany(PurchaseItem::class);
@@ -42,7 +40,6 @@ class Product extends Model
         return $this->belongsTo(Category::class);
     }
 
-    // علاقة مع تفاصيل قوالب التصنيع (كمكون)
     public function bomDetails()
     {
         return $this->hasMany(BOMDetail::class);

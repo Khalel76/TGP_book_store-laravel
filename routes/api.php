@@ -12,99 +12,76 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\InventoryTransactionController;
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\SellerMiddleware;
+use App\Http\Middleware\ManufacturerMiddleware;
+use App\Http\Middleware\SupervisorMiddleware;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
 Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::put('/profile', [AuthController::class, 'editProfile']);
-});
 
-Route::prefix('admin')->middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
 
-    // --- 1. Products ---
-    Route::prefix('products')->group(function () {
-        // List all products (supports ?type=raw_material filter)
-        Route::get('/', [ProductController::class, 'index']);
+    // 1. Admin Routes (Users, Products, Purchases)
+    Route::middleware(AdminMiddleware::class)->prefix('admin')->group(function () {
 
-        // Create new product (Raw material, Porcelain, or Manufactured)
-        Route::post('/', [ProductController::class, 'store']);
+        // User Management
+        Route::post('/users', [UserController::class, 'store']);
+        Route::get('/users', [UserController::class, 'index']);
+        Route::put('/users/{id}/block', [UserController::class, 'block']);
+        Route::put('/users/{id}/unblock', [UserController::class, 'unblock']);
 
-        // Update/Delete specific product
-        Route::put('/{id}', [ProductController::class, 'update']);
+        // Products
+        Route::prefix('products')->group(function () {
+            Route::get('/', [ProductController::class, 'index']);
+            Route::post('/', [ProductController::class, 'store']);
+            Route::put('/{id}', [ProductController::class, 'update']);
+            Route::delete('/{id}', [ProductController::class, 'destroy']);
+            Route::get('/{id}/stock', [ProductController::class, 'checkStock']);
+        });
 
-        Route::delete('/{id}', [ProductController::class, 'destroy']);
+        // Purchases & Suppliers
+        Route::prefix('purchases')->group(function () {
+            Route::post('/bill', [PurchaseController::class, 'store']);
+            Route::get('/bills', [PurchaseController::class, 'index']);
+        });
+        Route::apiResource('suppliers', SupplierController::class);
 
-        // Quick stock check for UI
-        Route::get('/{id}/stock', [ProductController::class, 'checkStock']);
+        // General Resources
+        Route::apiResource('customers', CustomerController::class);
+        Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('inventories', InventoryTransactionController::class);
     });
 
-
-
-    // --- 2. Sales & Customers ---
-    Route::prefix('sales')->group(function () {
-        // Create a new Sales Invoice (The main logic)
+    // 2. Seller Routes (Sales)
+    Route::middleware(SellerMiddleware::class)->prefix('sales')->group(function () {
         Route::post('/invoice', [SalesController::class, 'store']);
-
-        // Get Invoice History
         Route::get('/invoices', [SalesController::class, 'index']);
         Route::get('/invoices/{id}', [SalesController::class, 'show']);
     });
 
-    // Customer Management (Standard CRUD)
-    Route::apiResource('customers', CustomerController::class);
-
-
-    // --- 3. Purchasing & Suppliers ---
-    Route::prefix('purchases')->group(function () {
-        // Create a new Purchase Bill (Restocking)
-        Route::post('/bill', [PurchaseController::class, 'store']);
-
-        // Get Purchase History
-        Route::get('/bills', [PurchaseController::class, 'index']);
-    });
-
-    // Supplier Management (Standard CRUD)
-    Route::apiResource('suppliers', SupplierController::class);
-
-
-    // --- 4. Manufacturing System ---
-    Route::prefix('manufacturing')->group(function () {
-        // Bill of Materials (Recipes)
+    // 3. Manufacturer Routes (Manufacturing)
+    Route::middleware(ManufacturerMiddleware::class)->prefix('manufacturing')->group(function () {
         Route::get('/bom', [ManufacturingController::class, 'indexBOM']);
         Route::post('/bom', [ManufacturingController::class, 'storeBOM']);
-
-        // Production Orders
-        Route::post('/execute', [ManufacturingController::class, 'executeOrder']); // Run production logic
+        Route::post('/execute', [ManufacturingController::class, 'executeOrder']);
         Route::get('/orders', [ManufacturingController::class, 'indexOrders']);
     });
 
-
-    // --- 5. Finance & Treasury ---
-    Route::prefix('finance')->group(function () {
-        // Transaction Actions
+    // 4. Supervisor Routes (Finance)
+    Route::middleware(SupervisorMiddleware::class)->prefix('finance')->group(function () {
         Route::post('/pay-supplier', [FinanceController::class, 'paySupplier']);
         Route::post('/receive-payment', [FinanceController::class, 'receiveCustomerPayment']);
         Route::post('/expense', [FinanceController::class, 'storeExpense']);
-
-        // View Treasury Balances
         Route::get('/treasuries', [FinanceController::class, 'index']);
-
-        // View Transaction History
         Route::get('/transactions', [FinanceController::class, 'history']);
-
-        // Manage Treasuries
         Route::post('/treasuries', [FinanceController::class, 'storeTreasury']);
-
-        // Manage Expense Categories
         Route::post('/expense-categories', [FinanceController::class, 'storeExpenseCategory']);
     });
-
-    // --- 6. Categories ---
-    Route::apiResource('categories', CategoryController::class);
-    Route::apiResource('inventories', InventoryTransactionController::class);
 
 });

@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class FinanceController extends Controller
 {
-    // List all treasuries with balances
     public function index()
     {
         $treasuries = Treasury::all();
@@ -25,7 +24,6 @@ class FinanceController extends Controller
         ]);
     }
 
-    // Transaction history (unified view)
     public function history(Request $request)
     {
         $transactions = [];
@@ -57,7 +55,7 @@ class FinanceController extends Controller
                     'id' => $payment->id,
                     'type' => 'supplier_payment',
                     'date' => $payment->date,
-                    'amount' => -$payment->amount, // Negative because it's outgoing
+                    'amount' => -$payment->amount,
                     'party' => $payment->supplier->name ?? 'Unknown',
                     'description' => 'Payment to supplier',
                     'treasury_id' => $payment->treasury_id
@@ -74,7 +72,7 @@ class FinanceController extends Controller
                     'id' => $expense->id,
                     'type' => 'expense',
                     'date' => $expense->date,
-                    'amount' => -$expense->amount, // Negative because it's outgoing
+                    'amount' => -$expense->amount,
                     'party' => $expense->category->name ?? 'Expense',
                     'description' => $expense->description ?? 'Business expense',
                     'treasury_id' => $expense->treasury_id
@@ -107,12 +105,12 @@ class FinanceController extends Controller
             'treasury_id' => 'required|exists:treasuries,id'
         ]);
 
-        return DB::transaction(function () use ($request) {
-            // A. Create Record
+
+
             $payment = CustomerPayment::create($request->all() + ['date' => now()]);
 
             return response()->json(['message' => 'Payment received successfully', 'data' => $payment]);
-        });
+
     }
 
     // 2. Pay Supplier
@@ -125,13 +123,11 @@ class FinanceController extends Controller
         ]);
 
         return DB::transaction(function () use ($request) {
-            // A. Check if we have enough money
             $treasury = Treasury::find($request->treasury_id);
             if ($treasury->current_balance < $request->amount) {
                 return response()->json(['error' => 'Insufficient funds in treasury'], 400);
             }
 
-            // B. Create Record
             $payment = SupplierPayment::create($request->all() + ['date' => now()]);
 
             return response()->json(['message' => 'Supplier paid successfully', 'data' => $payment]);

@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    // List products (Can filter by type: raw_material, porcelain, manufactured)
     public function index(Request $request)
     {
         $query = Product::query()->with('category');

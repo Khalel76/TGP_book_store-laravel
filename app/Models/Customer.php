@@ -14,7 +14,6 @@ class Customer extends Model
         'name',
         'phone',
         'address',
-        // 'balance' removed, calculated dynamically
     ];
 
     public function salesInvoices()
@@ -30,7 +29,6 @@ class Customer extends Model
     public function getBalanceAttribute()
     {
         // Calculate total sales
-        // Note: maximizing performance would require raw queries or caching
         $totalSales = \App\Models\InvoiceItem::whereHas('salesInvoice', function ($q) {
             $q->where('customer_id', $this->id);
         })->selectRaw('sum(quantity * unit_price) as total')->value('total') ?? 0;

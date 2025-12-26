@@ -99,7 +99,6 @@ class PurchaseController extends Controller
                 ]);
             }
 
-            // Note: Supplier balance is calculated dynamically.
             // 3. Update Bill Total logic removed (total_amount dropped)
 
             DB::commit();

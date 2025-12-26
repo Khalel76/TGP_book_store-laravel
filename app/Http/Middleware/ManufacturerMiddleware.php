@@ -6,7 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class AdminMiddleware
+class ManufacturerMiddleware
 {
     /**
      * Handle an incoming request.
@@ -15,13 +15,12 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-
-        if($request->user()->type == 'admin'){
+        if ($request->user()->type == 'manufacturer' || $request->user()->type == 'admin') {
             return $next($request);
         }
 
         return response()->json([
-            'message'=>'you are not a admin'
-        ],403);
+            'message' => 'you are not a manufacturer'
+        ], 403);
     }
 }
